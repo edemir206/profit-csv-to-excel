@@ -28,42 +28,42 @@ if (csvFileInput.files.length > 0) {
 function processData(csvData) {
 const lines = csvData.trim().split('\n').slice(2); // Ignore a primeira linha
 
-const groupedByDate = {};
+    const groupedByDate = {};
 
-lines.forEach(line => {
-    const columns = line.split(';');
-    const ativo = columns[4];
-    const lado = columns[5];
-    const data = columns[7].split(' ')[0]; // Pegar apenas a parte da data, removendo a hora e o minuto
-    const ultimaAtualizacao = columns[8].split(' ')[0]; // Pegar apenas a parte da data, removendo a hora e o minuto
-    const precoMedio = parseFloat(columns[12].replace(',', '.'));
-    const qtdExecutada = parseInt(columns[13]);
+    lines.forEach(line => {
+        const columns = line.split(';');
+        const ativo = columns[4];
+        const lado = columns[5];
+        const data = columns[7].split(' ')[0]; // Pegar apenas a parte da data, removendo a hora e o minuto
+        const ultimaAtualizacao = columns[8].split(' ')[0]; // Pegar apenas a parte da data, removendo a hora e o minuto
+        const precoMedio = parseFloat(columns[12].replace(',', '.'));
+        const qtdExecutada = parseInt(columns[13]);
 
-    const key = `${data}_${ativo}`;
+        const key = `${data}_${ativo}_${lado}`;
 
-    if (!groupedByDate[key]) {
-        groupedByDate[key] = {
-            ativo, // Correção: Adicionar o ativo ao objeto
-            lado,
-            data,
-            ultimaAtualizacao,
-            precoTotal: precoMedio * qtdExecutada,
-            qtdTotal: qtdExecutada
-        };
-    } else {
-        groupedByDate[key].precoTotal += precoMedio * qtdExecutada;
-        groupedByDate[key].qtdTotal += qtdExecutada;
-    }
-});
+        if (!groupedByDate[key]) {
+            groupedByDate[key] = {
+                ativo, // Correção: Adicionar o ativo ao objeto
+                lado,
+                data,
+                ultimaAtualizacao,
+                precoTotal: precoMedio * qtdExecutada,
+                qtdTotal: qtdExecutada
+            };
+        } else {
+            groupedByDate[key].precoTotal += precoMedio * qtdExecutada;
+            groupedByDate[key].qtdTotal += qtdExecutada;
+        }
+    });
 
-result = Object.values(groupedByDate);
+    result = Object.values(groupedByDate);
 
-// Ordenar os dados pelo campo 'data' em ordem crescente
-result.sort((a, b) => (a.data > b.data ? 1 : -1));
+    // Ordenar os dados pelo campo 'data' em ordem crescente
+    result.sort((a, b) => (a.data > b.data ? 1 : -1));
 
-const selectedFields = getSelectedFields();
-const table = createTable(result, selectedFields);
-document.getElementById('resultTable').innerHTML = table;
+    const selectedFields = getSelectedFields();
+    const table = createTable(result, selectedFields);
+    document.getElementById('resultTable').innerHTML = table;
 }
 
 function getSelectedFields() {
