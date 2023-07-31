@@ -3,6 +3,8 @@
     $('#selectedFields').select2();
 });
 
+let result = [];
+
 function processCSV() {
 const csvDataInput = document.getElementById('csvData');
 const csvFileInput = document.getElementById('csvFile');
@@ -54,7 +56,7 @@ lines.forEach(line => {
     }
 });
 
-const result = Object.values(groupedByDate);
+result = Object.values(groupedByDate);
 
 // Ordenar os dados pelo campo 'data' em ordem crescente
 result.sort((a, b) => (a.data > b.data ? 1 : -1));
@@ -77,13 +79,46 @@ function getSelectedFields() {
     return selectedFields;
 }
 
+// Adicione uma variável global para armazenar a ordem atual das colunas
+let currentOrder = [];
+
+function reorder(i) {
+    // console.log(currentOrder);
+    const selectedFields = currentOrder.length > 0 ? currentOrder : getSelectedFields();
+    if (i > 0 && i < selectedFields.length) {
+        const temp = selectedFields[i];
+        selectedFields[i] = selectedFields[i - 1];
+        selectedFields[i - 1] = temp;
+        currentOrder = selectedFields; // Atualizar a ordem atual das colunas
+
+        console.log("Tempo :"+temp+" selectedFields[i] "+selectedFields[i]+ " selectedFields[i - 1] +"+temp);
+        console.log(currentOrder);
+
+        const table = createTable(result, selectedFields);
+        document.getElementById('resultTable').innerHTML = table;
+    }
+}
+
 function createTable(data, selectedFields) {
+
+     // Use o array currentOrder para determinar a ordem das colunas na tabela
+     selectedFields = currentOrder.length > 0 ? currentOrder : selectedFields;
+
+    //  console.log(currentOrder);
+
     let tableHTML = '<div class="table-responsive">';
     tableHTML += '<table class="table table-striped table-bordered table-hover">'; // Adicionando classes do Bootstrap
     tableHTML += '<thead class="table-primary"><tr>';
 
+    let i = 0;
+
     for (const field of selectedFields) {
-        tableHTML += `<th>${field}</th>`;
+        tableHTML += `<th>`;
+        if(i != 0) tableHTML += `<button onclick="reorder(${i})" class="btn btn-sm btn-secondary"> < </button>`;
+            tableHTML += " "+field+" ";
+        if(i+1 < selectedFields.length) tableHTML += `<button onclick="reorder(${i+1})" class="btn btn-sm btn-secondary"> > </button>`;
+        
+        i++;
     }
 
     tableHTML += '</tr></thead><tbody>';
