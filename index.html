@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Processamento de CSV</title>
+    <!-- Adicione os arquivos CSS do Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Adicione o arquivo CSS do Select2 -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="container">
+        <h1 class="my-4">Processamento de CSV</h1>
+        <p class="lead">Esta página permite fazer a conversão de um arquivo exportado do Profit para ser importado em uma planilha. Ele agrupa as operações dos ativos por dia e Lado (C ou V), somando as quantidades executadas e o valor executado para encontrar o preço médio diário para cada ativo, tanto para compras quanto para vendas. O objetivo é facilitar a posterior importação dos dados em planilhas como Google Sheets e Excel.</p>
+
+        <div class="mb-3">
+            <textarea id="csvData" rows="10" cols="100" class="form-control" placeholder="Cole o conteúdo do arquivo CSV aqui ou importe no botão abaixo"></textarea>
+        </div>
+        <div class="mb-3">
+            <input type="file" id="csvFile" accept=".csv" class="form-control">
+        </div>
+        <div class="mb-3">
+            <button onclick="processCSV()" class="btn btn-primary">Processar</button>
+        </div>
+        <div class="mb-3">
+            <!-- Transforme o elemento select em um Select2 -->
+            <select id="selectedFields" multiple="multiple" class="form-control">
+                <option value="Ativo" selected>Ativo</option>
+                <option value="Lado" selected>Lado</option>
+                <option value="Data" selected>Data</option>
+                <option value="Última Atualização">Última Atualização</option>
+                <option value="Preço Médio" selected>Preço Médio</option>
+                <option value="Qtd Executada" selected>Qtd Executada</option>
+            </select>
+        </div>
+        <div id="resultTable" class="mb-4"></div>
+    </div>
+
+    <!-- Adicione os arquivos JS do Bootstrap e jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <!-- Adicione o arquivo JS do Select2 -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <!-- Script com as funções -->
+    <script src="script.js"></script>
+    
+</body>
+</html>
