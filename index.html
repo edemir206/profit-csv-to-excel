@@ -32,7 +32,33 @@
                 <option value="Qtd Executada" selected>Qtd Executada</option>
             </select>
         </div>
-        <div id="resultTable" class="mb-4"></div>
+        <div>
+            <ul class="nav nav-tabs d-none" id="myTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="main-tab" data-bs-toggle="tab" data-bs-target="#main" type="button"
+                        role="tab" aria-controls="main" aria-selected="true">Tabela de Operações</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary" type="button"
+                        role="tab" aria-controls="summary" aria-selected="false">Tabela de Resumo</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="total-tab" data-bs-toggle="tab" data-bs-target="#total" type="button"
+                        role="tab" aria-controls="total" aria-selected="false">Somatório Total</button>
+                </li>
+            </ul>
+            <div class="tab-content" id="myTabContent">
+                <div class="tab-pane fade show active" id="main" role="tabpanel" aria-labelledby="main-tab">
+                    <div id="resultTable"></div>
+                </div>
+                <div class="tab-pane fade" id="summary" role="tabpanel" aria-labelledby="summary-tab">
+                    <div id="summaryTable"></div>
+                </div>
+                <div class="tab-pane fade" id="total" role="tabpanel" aria-labelledby="total-tab">
+                    <div id="summaryTotal" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Adicione os arquivos JS do Bootstrap e jQuery -->

@@ -4,6 +4,7 @@
 });
 
 let result = [];
+const formatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 
 function processCSV() {
 const csvDataInput = document.getElementById('csvData');
@@ -64,6 +65,11 @@ const lines = csvData.trim().split('\n').slice(2); // Ignore a primeira linha
     const selectedFields = getSelectedFields();
     const table = createTable(result, selectedFields);
     document.getElementById('resultTable').innerHTML = table;
+
+    document.getElementById('myTab').classList.remove('d-none');
+
+    generateSummaryTable(result);
+
 }
 
 function getSelectedFields() {
@@ -83,16 +89,12 @@ function getSelectedFields() {
 let currentOrder = [];
 
 function reorder(i) {
-    // console.log(currentOrder);
     const selectedFields = currentOrder.length > 0 ? currentOrder : getSelectedFields();
     if (i > 0 && i < selectedFields.length) {
         const temp = selectedFields[i];
         selectedFields[i] = selectedFields[i - 1];
         selectedFields[i - 1] = temp;
         currentOrder = selectedFields; // Atualizar a ordem atual das colunas
-
-        console.log("Tempo :"+temp+" selectedFields[i] "+selectedFields[i]+ " selectedFields[i - 1] +"+temp);
-        console.log(currentOrder);
 
         const table = createTable(result, selectedFields);
         document.getElementById('resultTable').innerHTML = table;
@@ -103,8 +105,6 @@ function createTable(data, selectedFields) {
 
      // Use o array currentOrder para determinar a ordem das colunas na tabela
      selectedFields = currentOrder.length > 0 ? currentOrder : selectedFields;
-
-    //  console.log(currentOrder);
 
     let tableHTML = '<div class="table-responsive">';
     tableHTML += '<table class="table table-striped table-bordered table-hover">'; // Adicionando classes do Bootstrap
@@ -125,7 +125,7 @@ function createTable(data, selectedFields) {
 
     for (const item of data) {
         const { data: itemData, ativo, lado, ultimaAtualizacao, precoTotal, qtdTotal } = item;
-        const precoMedio = (precoTotal / qtdTotal).toFixed(2).replace('.', ','); // Substituir ponto por vírgula
+        const precoMedio = (precoTotal / qtdTotal); // Substituir ponto por vírgula
 
         tableHTML += '<tr>';
         for (const field of selectedFields) {
@@ -138,7 +138,7 @@ function createTable(data, selectedFields) {
             } else if (field === 'Última Atualização') {
                 tableHTML += `<td>${ultimaAtualizacao}</td>`;
             } else if (field === 'Preço Médio') {
-                tableHTML += `<td>${precoMedio}</td>`;
+                tableHTML += `<td>${formatter.format(precoMedio)}</td>`;
             } else if (field === 'Qtd Executada') {
                 tableHTML += `<td>${qtdTotal}</td>`;
             }
@@ -148,4 +148,96 @@ function createTable(data, selectedFields) {
 
     tableHTML += '</tbody></table></div>';
     return tableHTML;
+}
+
+function generateSummaryTable(data) {
+    const summaryData = {};
+
+    // Calcula o resumo das movimentações agrupadas por ativo
+    data.forEach(item => {
+        const { ativo, lado, precoTotal, qtdTotal } = item;
+        const lucro = lado === 'C' ? precoTotal : -precoTotal;
+        const qtdTotalResumo=0;
+
+        if (!summaryData[ativo]) {
+            summaryData[ativo] = {
+                ativo,
+                totalCompra: lado === 'C' ? precoTotal : 0,
+                totalVenda: lado === 'V' ? precoTotal : 0,
+                qtdTotalResumo: lado === 'C' ? qtdTotalResumo+qtdTotal : qtdTotalResumo-qtdTotal,
+                lucro
+            };
+        } else {
+            summaryData[ativo].totalCompra += lado === 'C' ? precoTotal : 0;
+            summaryData[ativo].totalVenda += lado === 'V' ? precoTotal : 0;
+            summaryData[ativo].lucro += lucro;
+        }
+    });
+
+    // Calcula o resultado em porcentagem
+    Object.values(summaryData).forEach(item => {
+        item.lucroPorcentagem = ((item.lucro / (item.totalCompra + item.totalVenda)) * 100).toFixed(2);
+    });
+
+    // Ordena os dados pelo campo 'ativo' em ordem alfabética
+    const summaryTableData = Object.values(summaryData).sort((a, b) => (a.ativo > b.ativo ? 1 : -1));
+
+    // Cria a tabela de resumo
+    let summaryTableHTML = '<div class="table-responsive">';
+    summaryTableHTML += '<table class="table table-striped table-bordered table-hover">'; // Adicionando classes do Bootstrap
+    summaryTableHTML += '<thead class="table-primary"><tr>';
+    summaryTableHTML += '<th>Ativo</th>';
+    summaryTableHTML += '<th>Cotas</th>';
+    summaryTableHTML += '<th>Total Compra</th>';
+    summaryTableHTML += '<th>Total Venda</th>';
+    summaryTableHTML += '<th>Resultado</th>';
+    summaryTableHTML += '<th>Resultado em porcentagem</th>';
+    summaryTableHTML += '</tr></thead><tbody>';
+
+    // Adiciona os dados na tabela de resumo
+    summaryTableData.forEach(item => {
+        summaryTableHTML += '<tr>';
+        summaryTableHTML += `<td>${item.ativo}</td>`;
+        summaryTableHTML += `<td>${item.qtdTotalResumo}</td>`;
+        summaryTableHTML += `<td>${formatter.format(item.totalCompra)}</td>`;
+        summaryTableHTML += `<td>${formatter.format(item.totalVenda)}</td>`;
+        summaryTableHTML += `<td>${formatter.format(item.lucro)}</td>`;
+        summaryTableHTML += `<td>${item.lucroPorcentagem.replace('.', ',')}%</td>`;
+        summaryTableHTML += '</tr>';
+    });
+
+    summaryTableHTML += '</tbody></table></div>';
+
+    // Exibe a tabela de resumo
+    document.getElementById('summaryTable').innerHTML = summaryTableHTML;
+
+     // Exibe as informações de somatório total em uma pequena tabela
+     const totalCompra = summaryTableData.reduce((total, item) => total + item.totalCompra, 0);
+     const totalVenda = summaryTableData.reduce((total, item) => total + item.totalVenda, 0);
+     const lucroTotal = summaryTableData.reduce((total, item) => total + item.lucro, 0);
+     const lucroPorcentagemTotal = ((lucroTotal / (totalCompra + totalVenda)) * 100).toFixed(2);
+ 
+     const totalInfoHTML = `<div class="table-responsive">
+                               <table class="table">
+                                 <tbody>
+                                   <tr>
+                                     <th>Total Compra</th>
+                                     <td>${formatter.format(totalCompra)}</td>
+                                   </tr>
+                                   <tr>
+                                     <th>Total Venda</th>
+                                     <td>${formatter.format(totalVenda)}</td>
+                                   </tr>
+                                   <tr>
+                                     <th>Resultado</th>
+                                     <td>${formatter.format(lucroTotal)}</td>
+                                   </tr>
+                                   <tr>
+                                     <th>Resultado em porcentagem</th>
+                                     <td>${lucroPorcentagemTotal.replace('.', ',')}%</td>
+                                   </tr>
+                                 </tbody>
+                               </table>
+                             </div>`;
+     document.getElementById('summaryTotal').innerHTML = totalInfoHTML;
 }
