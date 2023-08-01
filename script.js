@@ -37,7 +37,7 @@ const lines = csvData.trim().split('\n').slice(2); // Ignore a primeira linha
         const data = columns[7].split(' ')[0]; // Pegar apenas a parte da data, removendo a hora e o minuto
         const ultimaAtualizacao = columns[8].split(' ')[0]; // Pegar apenas a parte da data, removendo a hora e o minuto
         const precoMedio = parseFloat(columns[12].replace(',', '.'));
-        const qtdExecutada = parseInt(columns[13]);
+        const qtdExecutada = parseInt(columns[13].replace('.', ''));
 
         const key = `${data}_${ativo}_${lado}`;
 
